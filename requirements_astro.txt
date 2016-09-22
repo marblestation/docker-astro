@@ -1,0 +1,40 @@
+# required by pandas to support HDF5
+#tables
+pandas
+jupyter
+#
+# Library for Astronomy
+astropy
+# Debugger
+pudb
+# C-extensions for python
+cython
+# IVOA Simple Application Messaging protocol (e.g. TOPCAT communication)
+# - Fails to compile because ssl.PROTOCOL_SSLv3 does not exists now
+#sampy
+# Detects python errors
+pyflakes
+# Machine learning algorithms
+scikit-learn
+# Lock files for concurrent processes
+lockfile
+# required by statsmodels
+patsy
+# Statistics
+statsmodels
+#-------------------------------------------------------------------------------
+# HTTP communications
+requests
+# File system monitoring
+watchdog
+#-------------------------------------------------------------------------------
+# DS9 regions
+pyregion
+pyds9
+# required by photutils
+scikit-image
+photutils
+#
+# required by gatspy
+supersmoother
+gatspy

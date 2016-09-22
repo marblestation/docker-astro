@@ -1,0 +1,13 @@
+#!/bin/bash
+DIRECTORY=$HOME/iraf
+
+if [ -d "$DIRECTORY"  ]; then
+    cd $DIRECTORY
+else
+    mkdir -p $DIRECTORY
+    cd $DIRECTORY
+    mkiraf << EOF
+xterm
+EOF
+fi
+ecl

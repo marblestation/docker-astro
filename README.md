@@ -54,8 +54,8 @@ docker_astro_container() {
             -v $HOME:/home/$DOCKER_USERNAME/workspace \
             -v ${HOME}/.ssh/id_rsa:/home/$DOCKER_USERNAME/.ssh/id_rsa:ro \
             -v $HOME/astrometry_index_4200:/opt/astrometry_catalogue:ro \
-            -v $HOME/ePipe:/home/$DOCKER_USERNAME/ePipe:ro \
-            -v $HOME/iSpec:/home/$DOCKER_USERNAME/iSpec:ro \
+            -v $HOME/ePipe:/home/$DOCKER_USERNAME/ePipe \
+            -v $HOME/iSpec:/home/$DOCKER_USERNAME/iSpec \
             marblestation/astro
             #-p 127.0.0.1:8888:8888 \
 }

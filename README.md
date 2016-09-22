@@ -17,11 +17,11 @@ docker build --build-arg USERNAME=john -t marblestation/astro .
 
 ### Selective cache layers:
 
-1. Include the following command in the Dockerfile from the point where layers should be ignored if they are in the cache (i.e., force execution):
+* Include the following command in the Dockerfile from the point where layers should be ignored if they are in the cache (i.e., force execution):
 ```
 ARG CACHEBUST=1
 ```
-2. Build as:
+* Build as:
 ```bash
 docker build -t marblestation/astro --build-arg CACHEBUST=$(date +%s) .
 ```
@@ -30,12 +30,12 @@ docker build -t marblestation/astro --build-arg CACHEBUST=$(date +%s) .
 
 ### OS X
 
-1. Install [XQuartz](https://www.xquartz.org/) [minimum 2.7.10_beta2](https://www.xquartz.org/releases/XQuartz-2.7.10_beta2.html) (previous version contain a bug)
-2. Open XQuartz: open -a XQuartz
+* Install [XQuartz](https://www.xquartz.org/) [minimum 2.7.10_beta2](https://www.xquartz.org/releases/XQuartz-2.7.10_beta2.html) (previous version contain a bug)
+* Open XQuartz: open -a XQuartz
     1. Update preferences 'Security' tab - turn on 'Allow connection from network clients'
     2. Restart XQuartz and then check to see that it is listening on port 6000: lsof -i :6000
 
-3. Add to the end of '$HOME/.bashrc':
+* Add to the end of '$HOME/.bashrc':
 ```bash
 # Start container based on the astro image
 docker_astro_container() {
@@ -78,11 +78,11 @@ alias docker_clean_images='printf "\n>>> Deleting untagged images\n\n" && docker
 # Delete all stopped containers and untagged images.
 alias docker_clean='docker_clean_containers || true && docker_clean_images'
 ```
-4. Load the new configuration:
+* Load the new configuration:
 ```
 source $HOME/.bashrc
 ```
-5. Run the image:
+* Run the image:
 ```
 docker_astro_container
 ```

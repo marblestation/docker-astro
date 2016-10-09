@@ -77,14 +77,17 @@ RUN apt-get update && \
                                                 python-tk \
                                                 #python-qt4 \
                                                 python-pip \
-                                                python-pandas \
                                                 python-numpy \
                                                 python-scipy \
                                                 python-matplotlib \
+                                                python-pandas \
                                                 python-setuptools && \
     pip install --upgrade pip && \
-    #pip install tables && \
+    pip install --upgrade numpy && \
+    pip install --upgrade scipy && \
+    pip install --upgrade matplotlib && \
     pip install --upgrade pandas && \
+    pip install tables && \
     pip install wheel && \
     pip install jupyter && \
     pip install pudb
@@ -141,7 +144,7 @@ RUN apt-get update && \
 
 ## RUST ########################################################################
 #-------------------------------------------------------------------------------
-ENV RUST_VERSION 1.11.0
+ENV RUST_VERSION 1.12.0
 RUN curl -sO https://static.rust-lang.org/dist/rust-${RUST_VERSION}-x86_64-unknown-linux-gnu.tar.gz && \
     tar -xzf rust-${RUST_VERSION}-x86_64-unknown-linux-gnu.tar.gz && \
     ./rust-${RUST_VERSION}-x86_64-unknown-linux-gnu/install.sh --without=rust-docs && \
@@ -155,7 +158,7 @@ RUN curl -sO https://static.rust-lang.org/dist/rust-${RUST_VERSION}-x86_64-unkno
 
 ## GOLANG ######################################################################
 #-------------------------------------------------------------------------------
-ENV GOLANG_VERSION 1.7
+ENV GOLANG_VERSION 1.7.1
 RUN curl -sLO https://golang.org/dl/go${GOLANG_VERSION}.linux-amd64.tar.gz && \
     tar -C /usr/local -xzf go${GOLANG_VERSION}.linux-amd64.tar.gz && \
     rm -f go${GOLANG_VERSION}.linux-amd64.tar.gz
@@ -218,10 +221,8 @@ RUN cd /home/${USERNAME}/ && \
         cd /home/${USERNAME}/.vim/autoload && \
         wget --quiet https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim && \
         cd /home/${USERNAME}/ && \
-        git clone https://github.com/marblestation/vim-complex-sensible && \
-        cp vim-complex-sensible/vimrc .vim/vimrc && \
+        wget --quiet https://raw.githubusercontent.com/marblestation/vim-complex-sensible/master/vimrc -O .vim/vimrc && \
         ln -s .vim/vimrc .vimrc && \
-        rm -rf vim-complex-sensible/ && \
         cd /home/${USERNAME}/.vim/spell/ && \
         wget --quiet http://ftp.vim.org/vim/runtime/spell/en.utf-8.spl && \
         wget --quiet http://ftp.vim.org/vim/runtime/spell/en.utf-8.sug && \

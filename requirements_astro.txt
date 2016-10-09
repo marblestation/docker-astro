@@ -1,5 +1,5 @@
-# required by pandas to support HDF5
-#tables
+# tables is required by pandas to support HDF5
+tables
 pandas
 jupyter
 #

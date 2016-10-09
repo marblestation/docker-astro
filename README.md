@@ -37,7 +37,7 @@ docker build -t marblestation/astro --build-arg CACHEBUST=$(date +%s) .
 
 * Add to the end of '$HOME/.bashrc':
 ```bash
-# Start container based on the astro image
+# Run container based on the astro image, if it already exist start/attach
 docker_astro_container() {
     GITNAME="Sergi Blanco-Cuaresma"
     GITEMAIL="marblestation@users.noreply.github.com"
@@ -46,7 +46,9 @@ docker_astro_container() {
     DOCKER_IP=$(ifconfig en0 | grep inet | awk '$1=="inet" {print $2}')
     xhost + $DOCKER_IP
 
-    docker run -it --rm \
+    echo -e "\n>>> Detach with ctrl-q,q.\n"
+    docker run -it \
+            --name astro \
             --detach-keys="ctrl-q,q" \
             --device /dev/fuse --cap-add SYS_ADMIN \
             -e DISPLAY=$DOCKER_IP:0 \
@@ -56,7 +58,8 @@ docker_astro_container() {
             -v $HOME/astrometry_index_4200:/opt/astrometry_catalogue:ro \
             -v $HOME/ePipe:/home/$DOCKER_USERNAME/ePipe \
             -v $HOME/iSpec:/home/$DOCKER_USERNAME/iSpec \
-            marblestation/astro
+            marblestation/astro \
+            || (echo -e "\n>>> Attaching to already existing container, press enter if you don't see the linux prompt.\n" && docker start -ia --detach-keys="ctrl-q,q" astro)
             #-p 127.0.0.1:8888:8888 \
 }
 

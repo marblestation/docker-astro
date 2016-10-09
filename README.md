@@ -18,10 +18,13 @@ docker build --build-arg USERNAME=john -t marblestation/astro .
 ### Selective cache layers:
 
 * Include the following command in the Dockerfile from the point where layers should be ignored if they are in the cache (i.e., force execution):
+
 ```
 ARG CACHEBUST=1
 ```
+
 * Build as:
+
 ```bash
 docker build -t marblestation/astro --build-arg CACHEBUST=$(date +%s) .
 ```
@@ -36,6 +39,7 @@ docker build -t marblestation/astro --build-arg CACHEBUST=$(date +%s) .
     2. Restart XQuartz and then check to see that it is listening on port 6000: lsof -i :6000
 
 * Add to the end of '$HOME/.bashrc':
+
 ```bash
 # Run container based on the astro image, if it already exist start/attach
 docker_astro_container() {
@@ -81,11 +85,15 @@ alias docker_clean_images='printf "\n>>> Deleting untagged images\n\n" && docker
 # Delete all stopped containers and untagged images.
 alias docker_clean='docker_clean_containers || true && docker_clean_images'
 ```
+
 * Load the new configuration:
+
 ```
 source $HOME/.bashrc
 ```
+
 * Run the image:
+
 ```
 docker_astro_container
 ```

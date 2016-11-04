@@ -107,7 +107,12 @@ RUN apt-get update && \
 #-------------------------------------------------------------------------------
 # Astrometry.net requires python with astro requirements
 COPY requirements_astro.txt requirements_astro.txt
-RUN pip install -r requirements_astro.txt
+RUN pip install -r requirements_astro.txt && \
+    git clone https://github.com/matplotlib/natgrid && \
+    cd natgrid/ && \
+    python setup.py install && \
+    cd .. && \
+    rm -rf natgrid/
 #...............................................................................
 COPY scripts/install_astrometry.sh install_astrometry.sh
 RUN apt-get update && \
@@ -144,7 +149,7 @@ RUN apt-get update && \
 
 ## RUST ########################################################################
 #-------------------------------------------------------------------------------
-ENV RUST_VERSION 1.12.0
+ENV RUST_VERSION 1.12.1
 RUN curl -sO https://static.rust-lang.org/dist/rust-${RUST_VERSION}-x86_64-unknown-linux-gnu.tar.gz && \
     tar -xzf rust-${RUST_VERSION}-x86_64-unknown-linux-gnu.tar.gz && \
     ./rust-${RUST_VERSION}-x86_64-unknown-linux-gnu/install.sh --without=rust-docs && \

@@ -47,40 +47,50 @@ docker_astro_container() {
     GITEMAIL="marblestation@users.noreply.github.com"
     DOCKER_USERNAME="docker"
 
-    DOCKER_IP=$(ifconfig en0 | grep inet | awk '$1=="inet" {print $2}')
+    DOCKER_IP=$(ifconfig $(route -n get default |grep interface|cut -f 2 -d ':') | grep inet | awk '$1=="inet" {print $2}')
     xhost + $DOCKER_IP
 
-    echo -e "\n>>> Detach with ctrl-q,q.\n"
-    docker run -it \
-            --name astro \
-            --detach-keys="ctrl-q,q" \
-            --device /dev/fuse --cap-add SYS_ADMIN \
-            -e DISPLAY=$DOCKER_IP:0 \
-            -e GITEMAIL="$GITEMAIL" -e GITNAME="$GITNAME" \
-            -v $HOME:/home/$DOCKER_USERNAME/workspace \
-            -v ${HOME}/.ssh/id_rsa:/home/$DOCKER_USERNAME/.ssh/id_rsa:ro \
-            -v $HOME/astrometry_index_4200:/opt/astrometry_catalogue:ro \
-            -v $HOME/ePipe:/home/$DOCKER_USERNAME/ePipe \
-            -v $HOME/iSpec:/home/$DOCKER_USERNAME/iSpec \
-            marblestation/astro \
-            || (echo -e "\n>>> Attaching to already existing container, press enter if you don't see the linux prompt.\n" && docker start -ia --detach-keys="ctrl-q,q" astro)
+    STATUS=$(docker inspect --format="{{ .State.Status  }}" astro 2>/dev/null )
+    if [ $? -eq 0 ]; then
+        if [ ${STATUS} = "exited" ]; then
+            echo -e "\n>>> Attaching to already existing container, press enter if you don't see the linux prompt."
+        elif [ ${STATUS} = "running" ]; then
+            echo -e "\n>>> Attaching to already running container, press enter if you don't see the linux prompt."
+        fi
+        echo -e "\n>>> Detach with ctrl-q,q.\n"
+        docker start -ia --detach-keys="ctrl-q,q" astro
+    else
+        echo -e "\n>>> Detach with ctrl-q,q.\n"
+        docker run -it \
+                --name astro \
+                --detach-keys="ctrl-q,q" \
+                --device /dev/fuse --cap-add SYS_ADMIN \
+                -e DISPLAY=$DOCKER_IP:0 \
+                -e GITEMAIL="${GITEMAIL}" -e GITNAME="${GITNAME}" \
+                -v $HOME:/home/$DOCKER_USERNAME/workspace \
+                -v ${HOME}/.ssh/id_rsa:/home/$DOCKER_USERNAME/.ssh/id_rsa:ro \
+                -v $HOME/astrometry_index_4200:/opt/astrometry_catalogue:ro \
+                -v $HOME/ePipe:/home/$DOCKER_USERNAME/ePipe \
+                -v $HOME/iSpec:/home/$DOCKER_USERNAME/iSpec \
+                marblestation/astro
             #-p 127.0.0.1:8888:8888 \
+    fi
 }
 
 # Kill all running containers.
-alias docker_killall='printf "\n>>> Killing all containers\n\n" && docker kill $(docker ps -q)'
+alias docker_killall='printf "\n>>> Killing all containers\n\n" && docker kill $(docker ps -q) 2>/dev/null'
 
 # Stop all running containers.
-alias docker_stopall='printf "\n>>> Stoping all containers\n\n" && docker stop $(docker ps -q)'
+alias docker_stopall='printf "\n>>> Stoping all containers\n\n" && docker stop $(docker ps -q) 2>/dev/null'
 
 # List all containers and images.
 alias docker_listall='printf "\n>>> List all containers\n\n" && docker ps -a && printf "\n>>> List all containers\n\n" && docker images'
 
 # Delete all stopped containers.
-alias docker_clean_containers='printf "\n>>> Deleting stopped containers\n\n" && docker rm -v $(docker ps -a -q -f status=exited)'
+alias docker_clean_containers='printf "\n>>> Deleting stopped containers\n\n" && docker rm -v $(docker ps -a -q -f status=exited) 2>/dev/null'
 
 # Delete all untagged images.
-alias docker_clean_images='printf "\n>>> Deleting untagged images\n\n" && docker rmi $(docker images -q -f dangling=true)'
+alias docker_clean_images='printf "\n>>> Deleting untagged images\n\n" && docker rmi $(docker images -q -f dangling=true) 2>/dev/null'
 
 # Delete all stopped containers and untagged images.
 alias docker_clean='docker_clean_containers || true && docker_clean_images'

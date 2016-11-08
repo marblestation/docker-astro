@@ -47,17 +47,21 @@ docker_astro_container() {
     GITEMAIL="marblestation@users.noreply.github.com"
     DOCKER_USERNAME="docker"
 
+    clear
     DOCKER_IP=$(ifconfig $(route -n get default |grep interface|cut -f 2 -d ':') | grep inet | awk '$1=="inet" {print $2}')
     xhost + $DOCKER_IP
 
     STATUS=$(docker inspect --format="{{ .State.Status  }}" astro 2>/dev/null )
     if [ $? -eq 0 ]; then
         if [ ${STATUS} = "exited" ]; then
-            echo -e "\n>>> Attaching to already existing container, press enter if you don't see the linux prompt."
+            echo -e "\n>>> Attaching to already existing container, press ENTER if you don't see the linux prompt."
+            docker start astro > /dev/null # It is needed to have it running for 'exec' to work
         elif [ ${STATUS} = "running" ]; then
-            echo -e "\n>>> Attaching to already running container, press enter if you don't see the linux prompt."
+            echo -e "\n>>> Attaching to already running container, press ENTER if you don't see the linux prompt."
         fi
-        echo -e "\n>>> Detach with ctrl-q,q.\n"
+        echo -e "\n>>> Run 'source /home/$DOCKER_USERNAME/.display' to update XQuartz/X11 display environment variable."
+        echo -e "\n>>> Detach with 'ctrl-q,q'.\n"
+        docker exec -d astro bash -c "echo 'export DISPLAY=$DOCKER_IP:0' > /home/$DOCKER_USERNAME/.display"
         docker start -ia --detach-keys="ctrl-q,q" astro
     else
         echo -e "\n>>> Detach with ctrl-q,q.\n"

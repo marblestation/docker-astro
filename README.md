@@ -31,10 +31,10 @@ docker build -t marblestation/astro --build-arg CACHEBUST=$(date +%s) .
 
 ## Run the image
 
-### OS X
+### Linux / OS X
 
-* Install [XQuartz](https://www.xquartz.org/) [minimum 2.7.10_beta2](https://www.xquartz.org/releases/XQuartz-2.7.10_beta2.html) (previous version contain a bug)
-* Open XQuartz: open -a XQuartz
+
+* (OSX only) Install [XQuartz](https://www.xquartz.org/) [minimum 2.7.11](https://www.xquartz.org/releases/) and open XQuartz: open -a XQuartz
     1. Update preferences 'Security' tab - turn on 'Allow connection from network clients'
     2. Restart XQuartz and then check to see that it is listening on port 6000: lsof -i :6000
 
@@ -47,38 +47,67 @@ docker_astro_container() {
     GITEMAIL="marblestation@users.noreply.github.com"
     DOCKER_USERNAME="docker"
 
-    clear
-    DOCKER_IP=$(ifconfig $(route -n get default |grep interface|cut -f 2 -d ':') | grep inet | awk '$1=="inet" {print $2}')
-    xhost + $DOCKER_IP
+	ASTROMETRY_INDEX_DIRNAME=$HOME/astrometry_index_4200
+	EPIPE_DIRNAME=$HOME/ePipe
+	ISPEC_DIRNAME=$HOME/iSpec
 
-    STATUS=$(docker inspect --format="{{ .State.Status  }}" astro 2>/dev/null )
-    if [ $? -eq 0 ]; then
-        if [ ${STATUS} = "exited" ]; then
-            echo -e "\n>>> Attaching to already existing container, press ENTER if you don't see the linux prompt."
-            docker start astro > /dev/null # It is needed to have it running for 'exec' to work
-        elif [ ${STATUS} = "running" ]; then
-            echo -e "\n>>> Attaching to already running container, press ENTER if you don't see the linux prompt."
-        fi
-        echo -e "\n>>> Run 'source /home/$DOCKER_USERNAME/.display' to update XQuartz/X11 display environment variable."
-        echo -e "\n>>> Detach with 'ctrl-q,q'.\n"
-        docker exec -d astro bash -c "echo 'export DISPLAY=$DOCKER_IP:0' > /home/$DOCKER_USERNAME/.display"
-        docker start -ia --detach-keys="ctrl-q,q" astro
-    else
-        echo -e "\n>>> Detach with ctrl-q,q.\n"
-        docker run -it \
-                --name astro \
-                --detach-keys="ctrl-q,q" \
-                --device /dev/fuse --cap-add SYS_ADMIN \
-                -e DISPLAY=$DOCKER_IP:0 \
-                -e GITEMAIL="${GITEMAIL}" -e GITNAME="${GITNAME}" \
-                -v $HOME:/home/$DOCKER_USERNAME/workspace \
-                -v ${HOME}/.ssh/id_rsa:/home/$DOCKER_USERNAME/.ssh/id_rsa:ro \
-                -v $HOME/astrometry_index_4200:/opt/astrometry_catalogue:ro \
-                -v $HOME/ePipe:/home/$DOCKER_USERNAME/ePipe \
-                -v $HOME/iSpec:/home/$DOCKER_USERNAME/iSpec \
-                marblestation/astro
-            #-p 127.0.0.1:8888:8888 \
-    fi
+	PLATFORM=`uname`
+	clear
+
+	if [[ "$PLATFORM" == 'Darwin' ]]; then
+		DOCKER_IP=$(ifconfig $(route -n get default |grep interface|cut -f 2 -d ':') | grep inet | awk '$1=="inet" {print $2}')
+		xhost + $DOCKER_IP
+	fi
+
+	STATUS=$(docker inspect --format="{{ .State.Status  }}" astro 2>/dev/null )
+	if [ $? -eq 0 ]; then
+		if [ ${STATUS} = "exited" ]; then
+			echo -e "\n>>> Attaching to already existing container, press ENTER if you don't see the linux prompt."
+			docker start astro > /dev/null # It is needed to have it running for 'exec' to work
+		elif [ ${STATUS} = "running" ]; then
+			echo -e "\n>>> Attaching to already running container, press ENTER if you don't see the linux prompt."
+		fi
+		
+		if [[ "$PLATFORM" == 'Darwin' ]]; then
+			echo -e "\n>>> Run 'source /home/$DOCKER_USERNAME/.display' to update XQuartz/X11 display environment variable."
+			docker exec -d astro bash -c "echo 'export DISPLAY=$DOCKER_IP:0' > /home/$DOCKER_USERNAME/.display"
+		fi
+		echo -e "\n>>> Detach with 'ctrl-q,q'.\n"
+		docker start -ia --detach-keys="ctrl-q,q" astro
+	else
+		echo -e "\n>>> Detach with ctrl-q,q.\n"
+
+		if [[ "$PLATFORM" == 'Linux' ]]; then
+			docker run -it \
+					--name astro \
+					--detach-keys="ctrl-q,q" \
+					--device /dev/fuse --cap-add SYS_ADMIN \
+					-e DISPLAY=$DISPLAY \
+					-e GITEMAIL="${GITEMAIL}" -e GITNAME="${GITNAME}" \
+					-v /tmp/.X11-unix:/tmp/.X11-unix \
+					-v $HOME:/home/$DOCKER_USERNAME/workspace \
+					-v ${HOME}/.ssh/id_rsa:/home/$DOCKER_USERNAME/.ssh/id_rsa:ro \
+					-v $ASTROMETRY_INDEX_DIRNAME:/opt/astrometry_catalogue:ro \
+					-v $EPIPE_DIRNAME:/home/$DOCKER_USERNAME/ePipe \
+					-v $ISPEC_DIRNAME:/home/$DOCKER_USERNAME/iSpec \
+					marblestation/astro
+				#-p 127.0.0.1:8888:8888 \
+		elif [[ "$PLATFORM" == 'Darwin' ]]; then
+			docker run -it \
+					--name astro \
+					--detach-keys="ctrl-q,q" \
+					--device /dev/fuse --cap-add SYS_ADMIN \
+					-e DISPLAY=$DOCKER_IP:0 \
+					-e GITEMAIL="${GITEMAIL}" -e GITNAME="${GITNAME}" \
+					-v $HOME:/home/$DOCKER_USERNAME/workspace \
+					-v ${HOME}/.ssh/id_rsa:/home/$DOCKER_USERNAME/.ssh/id_rsa:ro \
+					-v $ASTROMETRY_INDEX_DIRNAME:/opt/astrometry_catalogue:ro \
+					-v $EPIPE_DIRNAME:/home/$DOCKER_USERNAME/ePipe \
+					-v $ISPEC_DIRNAME:/home/$DOCKER_USERNAME/iSpec \
+					marblestation/astro
+				#-p 127.0.0.1:8888:8888 \
+		fi
+	fi
 }
 
 # Kill all running containers.
